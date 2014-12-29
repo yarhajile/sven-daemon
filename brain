@@ -1,0 +1,125 @@
+#!/usr/bin/python
+
+"""
+Copyright (C) 2014, Web Bender Consulting, LLC. - All Rights Reserved
+Unauthorized copying of this file, via any medium is strictly prohibited
+Proprietary and confidential
+Written by Elijah Ethun <elijahe@gmail.com>
+"""
+
+
+is_running   = True
+config_file  = "sven-daemon.conf"
+
+import time
+import traceback
+
+import Sven.Exception
+
+from Sven.Methods import *
+from Sven.Classes import *
+from Sven.ModuleFactory import ModuleFactory
+from Sven.Database import Database as db
+
+
+if __name__ == "__main__":
+  notice("==================================================================================================== ")
+  notice("          _____                    _____                    _____                    _____           ")
+  notice("         /\    \                  /\    \                  /\    \                  /\    \          ")
+  notice("        /::\    \                /::\____\                /::\    \                /::\____\         ")
+  notice("       /::::\    \              /:::/    /               /::::\    \              /::::|   |         ")
+  notice("      /::::::\    \            /:::/    /               /::::::\    \            /:::::|   |         ")
+  notice("     /:::/\:::\    \          /:::/    /               /:::/\:::\    \          /::::::|   |         ")
+  notice("    /:::/__\:::\    \        /:::/____/               /:::/__\:::\    \        /:::/|::|   |         ")
+  notice("    \:::\   \:::\    \       |::|    |               /::::\   \:::\    \      /:::/ |::|   |         ")
+  notice("  ___\:::\   \:::\    \      |::|    |     _____    /::::::\   \:::\    \    /:::/  |::|   | _____   ")
+  notice(" /\   \:::\   \:::\    \     |::|    |    /\    \  /:::/\:::\   \:::\    \  /:::/   |::|   |/\    \  ")
+  notice("/::\   \:::\   \:::\____\    |::|    |   /::\____\/:::/__\:::\   \:::\____\/:: /    |::|   /::\____\ ")
+  notice("\:::\   \:::\   \::/    /    |::|    |  /:::/    /\:::\   \:::\   \::/    /\::/    /|::|  /:::/    / ")
+  notice(" \:::\   \:::\   \/____/     |::|    | /:::/    /  \:::\   \:::\   \/____/  \/____/ |::| /:::/    /  ")
+  notice("  \:::\   \:::\    \         |::|____|/:::/    /    \:::\   \:::\    \              |::|/:::/    /   ")
+  notice("   \:::\   \:::\____\        |:::::::::::/    /      \:::\   \:::\____\             |::::::/    /    ")
+  notice("    \:::\  /:::/    /        \::::::::::/____/        \:::\   \::/    /             |:::::/    /     ")
+  notice("     \:::\/:::/    /          ~~~~~~~~~~               \:::\   \/____/              |::::/    /      ")
+  notice("      \::::::/    /                                     \:::\    \                  /:::/    /       ")
+  notice("       \::::/    /                                       \:::\____\                /:::/    /        ")
+  notice("        \::/    /                                         \::/    /                \::/    /         ")
+  notice("         \/____/                                           \/____/                  \/____/          ")
+  notice("==================================================================================================== ")
+
+  # Parse and validate all configuration options.
+  config = Config()
+  config.setFileName(config_file)
+
+  try:
+    config.parse()
+    config.validate()
+  except IOError as ex:
+    print "Failed to parse configuration file %s: %s" % (config.getFileName(), ex.args[0])
+    sys.exit(-1)
+
+  # Detach from the controlling terminal.
+  #Sven.Daemon.background()
+
+  notice("\nSven's brain is smarting up...\n")
+
+  # Setup signal handlers.
+  listen()
+
+
+  # Connect to the database.
+  try:
+    db = db(config)
+
+  except Exception as ex:
+    raise Sven.Exception.AlertException("Failed to connect to database: %s."
+                                        % (ex.args[0]), alert = True)
+
+    sys.exit(-1)
+
+
+  notice("\nBasic neural pathways laid, Sven is gonna go ahead now and build "
+         "out your modules, yes?\n")
+
+  # Load the module factory & Dispatch our available modules.
+  module_factory = ModuleFactory(db, config)
+
+  # Store our config in module_factory so that threaded database connections
+  # can reference it.
+  module_factory.config = config
+
+  # At this point, all threads are up & running in the background.
+  # Keep this show on the road!
+  try:
+    while is_running:
+        # This will be set to false from utils.signalHandler() on SIGTERM
+        # Perform queued up database write operations on the main thread only
+        # This is because there is no concurrency in write operations when 
+        # multiple instances of sqlite are opened
+        # Child threads can still read, but writing will fail.
+        module_factory.runQueue()
+
+        time.sleep(.1)
+
+  except KeyboardInterrupt:
+    # Stop all running threads
+    notice("\n---------------\nStopping threads...")
+    db.cursor.close()
+    db.close()
+
+    for thread in module_factory.threads.threads:
+      notice("    Stopping %s" % thread.name)
+      # Issue stop commands for cleanup.
+      thread.stop()
+      # Tell the thread to join the currently running thread so we can
+      # properly exit.
+      thread.join()
+  except:
+    notice(traceback.format_exc())
+
+  finally:
+#    notice(traceback.format_exc())
+    notice("IO monitor stopped")
+    sys.exit()
+else:
+  raise Exception("Nope nope nope")

@@ -1,0 +1,13 @@
+Disble HDMI + audio
+    /boot/uboot/uEnv.txt
+        cape_disable=capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN
+
+
+Edit /etc/modprobe.d/alsa-base.conf
+    change
+        options snd-usb-audio index=-2
+        to
+        options snd-usb-audio index=0
+
+pip install pyttsx
+apt-get install libespeak-dev python-espeak

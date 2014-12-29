@@ -1,0 +1,12 @@
+data/Makefile.i
+data/receive.cpp.i
+data/livolo.cpp.i
+data/send.cpp.i
+data/livolo.h.i
+data/RCSwitch.h.i
+data/.hgignore.i
+data/gpio.h.i
+data/livolo_send.cpp.i
+data/RCSwitch.cpp.i
+data/test.c.i
+data/gpio.c.i
