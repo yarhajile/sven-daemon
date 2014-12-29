@@ -5,13 +5,9 @@ Proprietary and confidential
 Written by Elijah Ethun <elijahe@gmail.com>
 """
 
-import time
-import traceback
-import Sven.Database
 import Adafruit_BBIO.GPIO as AdaGPIO
+from Sven.Module.BeagleboneBlack.Base import Base
 
-from Sven.methods import *
-from Sven.BeagleboneBlack.Base import Base
 
-class ADC(Base) :
+class ADC(Base):
   pass

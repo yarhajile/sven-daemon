@@ -83,6 +83,7 @@ class InterfaceMeta(object):
 def GetMeta(object):
   output = {}
 
+  output['module_name'] = object.__class__.__name__
   for key in dir(object.Meta):
     if key[0] != '_' :
       output[key] = getattr(object.Meta, key)

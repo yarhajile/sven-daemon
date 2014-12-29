@@ -95,12 +95,6 @@ class RCSwitch(Base):
                 callback = 'RCSwitchTriggered',
                 message = '')
 
-              # Tell the front-end that we see something
-              self.getWebSocketServer().broadcastMessage(
-                data = data,
-                callback = 'UnitCodeDiscovered',
-                message = '')
-
         if valueFound == False:
           # Buffer notifications at 3 seconds
           if last_received_value != value or last_execution_time < time.time() - 3:
@@ -111,7 +105,10 @@ class RCSwitch(Base):
 
             # Tell the front-end that we see something
             self.getWebSocketServer().broadcastMessage(
-              data = {'unitcode' : value, 'time' : last_execution_time},
+              data = {
+                'unitcode' : value,
+                'time' : last_execution_time
+              },
               callback = 'UnitCodeDiscovered', message = '')
 
       time.sleep(.03)

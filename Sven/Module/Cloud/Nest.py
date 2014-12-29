@@ -177,6 +177,7 @@ class Nest(Base):
       "https://home.nest.com/api/0.1/weather/forecast/%s" % postal_code).json()
 
 
+
   def getUserLocations(self):
     self.setup()
     user_structures = []
@@ -240,6 +241,57 @@ class Nest(Base):
       'local_ip' : device['local_ip'],
       'mac_address' : device['mac_address']
     }
+
+  def tempInput(self, temp):
+    if ( self.units == "F" ):
+      return ( temp - 32.0 ) / 1.8
+
+    return temp
+
+
+  def tempOutput(self, temp):
+    if ( self.units == "F" ):
+      return temp * 1.8 + 32.0
+
+    return temp
+
+
+  def temperatureInUserScale(self, temperature_in_celsius):
+    if self.temperatureScale() == 'F':
+      return ( temperature_in_celsius * 1.8 ) + 32
+
+
+  def temperatureScale(self):
+    return self.status['device'][self.serial]['temperature_scale']
+
+
+  def temperature_in_celsius(self, temperature):
+    if 'F' == self.temperatureScale():
+      return ( temperature - 32 ) / 1.8
+
+    return temperature
+
+
+  def currentTemperature(self):
+    return "%0.1f" % self.tempOutput(
+      self.status["shared"][self.serial]["current_temperature"])
+
+
+  def currentHumidity(self):
+    return self.status["device"][self.serial]["current_humidity"]
+
+
+  def currentWeather(self):
+    weather = {
+      'inside_temperature' : self.temperature,
+      'inside_humidity' : self.humidity,
+      'outside_weather' : self.getWeather(
+        self.status['device'][self.serial]['postal_code']),
+    }
+
+    weather['outside_weather']['now']['current_temperature'] = self.temperatureInUserScale(weather['outside_weather']['now']['current_temperature'])
+    return weather
+
 
   #
   # Output Actions

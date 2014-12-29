@@ -402,14 +402,13 @@ class ModuleBase(object):
     if not re.match('^action_', kwargs['action']):
       kwargs['action'] = 'action_' + kwargs['action']
 
-    object = getattr(self, kwargs['action'], None)()
+    notice("runTriggeredEvent() with %s" % kwargs['action'])
+
 
     try:
-      if object is not None:
-        return object.run(self, calling_module = kwargs['calling_module'],
-                          **kwargs['parameters']);
-      else:
-        notice("Unable to perform action: %s" % kwargs['action'])
+      object = getattr(self, kwargs['action'])()
+      return object.run(self, calling_module = kwargs['calling_module'],
+                        **kwargs['parameters'])
     except:
       notice(traceback.format_exc())
 
@@ -687,7 +686,7 @@ class ModuleBase(object):
       return output
 
 
-  class action_module_factoryStatus(object):
+  class action_ModuleFactoryStatus(object):
     class Meta(Meta):
       name = 'Module Factory Status'
       output_action_ignore = True

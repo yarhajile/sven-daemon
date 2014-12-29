@@ -113,15 +113,8 @@ class NestThermostat(Nest):
         self.temperature = self.currentTemperature()
         self.humidity = self.currentHumidity()
 
-        data = {
-          'inside_temperature' : self.temperature,
-          'inside_humidity' : self.humidity,
-          'outside_weather' : self.getWeather(
-            self.status['device'][self.serial]['postal_code']),
-        }
-
         self.getWebSocketServer().broadcastMessage(
-          data = data,
+          data = self.currentWeather(),
           callback = 'CurrentWeather',
           message = '')
 
@@ -134,7 +127,6 @@ class NestThermostat(Nest):
       # stuck waiting for this long-run loop to finish.
       updateTimer += .5
       time.sleep(1)
-
 
   @classmethod
   def dispatch(cls, module_factory, db, **kwargs):
@@ -164,45 +156,6 @@ class NestThermostat(Nest):
         object.addThread()
       except:
         notice(traceback.format_exc())
-
-
-  def tempInput(self, temp):
-    if ( self.units == "F" ):
-      return ( temp - 32.0 ) / 1.8
-
-    return temp
-
-
-  def tempOutput(self, temp):
-    if ( self.units == "F" ):
-      return temp * 1.8 + 32.0
-
-    return temp
-
-
-  def temperatureInUserScale(self, temperature_in_celsius):
-    if self.temperatureScale() == 'F':
-      return ( temperature_in_celsius * 1.8 ) + 32
-
-
-  def temperatureScale(self):
-    return self.status['device'][self.serial]['temperature_scale']
-
-
-  def temperature_in_celsius(self, temperature):
-    if 'F' == self.temperatureScale():
-      return ( temperature - 32 ) / 1.8
-
-    return temperature
-
-
-  def currentTemperature(self):
-    return "%0.1f" % self.tempOutput(
-      self.status["shared"][self.serial]["current_temperature"])
-
-
-  def currentHumidity(self):
-    return self.status["device"][self.serial]["current_humidity"]
 
 
   def energyLatest(self):
@@ -457,12 +410,7 @@ class NestThermostat(Nest):
       description = 'Current Weather Details'
 
     def run(self, outer, *args, **kwargs):
-      return {
-        'inside_temperature' : outer.currentTemperature(),
-        'inside_humidity' : outer.currentHumidity(),
-        'outside_weather' : outer.getWeather(
-          outer.status['device'][self.serial]['postal_code']),
-      }
+      return outer.currentWeather()
 
 
   class action_SetTemperature(object):
