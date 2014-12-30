@@ -1,4 +1,5 @@
-Sven
+sven-frontend
+======a=======
 
 Sven is a multi-threaded daemonized Python service I wrote in an attempt to bring together disparate security / automation / control devices and services.  
 
@@ -42,7 +43,7 @@ Scenario C
     FRONT DOOR SWITCH silently triggers the SMS NOTIFICATION when the ALARM is in the 'home' state and the current time is between 8:00PM and 8:00AM.
 
 
-The biggest problem I saw with other automation and control systems is that you were tied to their own specific interface that only worked with devices for that particular service.  I wanted a one-stop-shop to control this behavior in a modular fashion and this is where the idea for Sven came from.  I have no prior experience in automation / control systems and as a personal experiment and I intentionally chose to not look into other systems that might be performing in a similar way in an effort to come up with a system that fit my needs and wants. 
+The biggest problem I saw with other automation and control systems is that you were tied to their own specific interface that only worked with devices for that particular service.  I wanted a one-stop-shop to control this behavior in a modular fashion and this is where the idea for Sven came from.  I have no prior experience in automation / control systems and as a personal experiment I intentionally chose to not look into other systems that might be performing in a similar way in an effort to come up with a system that fit my needs and wants. 
 
 At its core is the ModuleFactory which is responsible for dispatching the various module device instances and bringing them together under one roof.
 
