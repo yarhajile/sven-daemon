@@ -12,6 +12,12 @@ from Sven.Methods import *
 
 
 class Alarm(Base):
+  module_parameters = []
+  current_state = None
+
+  def __init__(self, module_factory = None, db = None, id = None):
+    super(Alarm, self).__init__(module_factory, db, id)
+
   class Meta(Meta):
     """
     Provides details about this module.
@@ -20,23 +26,17 @@ class Alarm(Base):
 
 
   def threadTarget(self, thread):
-    """
-    This method is the thread 'target' called from the parent addThread()
-    method. The parent addThread() method is typically called from our static
-    dispatch method.
-    """
-
     while thread.running == True:
       if self.event_triggered is not None:
         self.runTriggeredEvents()
 
       self.runTimedUpdates(thread)
 
-      time.sleep(.5)
+      time.sleep(.2)
 
 
   def setOutputActionConditions(self):
-    self.output_action_conditions = Sven.Conditions.Conditions()
+    self.output_action_conditions = Conditions()
 
     self.output_action_conditions.add(
       key = 'indoor_temp',
@@ -85,3 +85,17 @@ class Alarm(Base):
       description = 'Heating & Air Conditioning Mode',
       values = hvac_modes,
       predicates = ['ne', 'gt', 'eq'])
+
+  class action_GetStatus(object):
+    class Meta(Meta):
+      name = 'Get Alarm Status'
+
+    def run(self, outer, *args, **kwargs):
+      return outer.current_state
+
+  class action_SetStatus(object):
+    class Meta(Meta):
+      name = 'Set Alarm Status'
+
+    def run(self, outer, *args, **kwargs):
+      outer.current_state = kwargs['state']

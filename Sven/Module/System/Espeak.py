@@ -32,13 +32,6 @@ class Espeak(Base):
 
 
   def threadTarget(self, thread):
-
-    """
-    This method is the thread 'target' called from the parent addThread()
-    method. The parent addThread() method is typically called from our static
-    dispatch method.
-    """
-
     self.engine = pyttsx.init()
     self.engine.setProperty('rate', self.espeakrate)
     self.engine.startLoop(False)
