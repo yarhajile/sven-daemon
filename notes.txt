@@ -11,3 +11,16 @@ Edit /etc/modprobe.d/alsa-base.conf
 
 pip install pyttsx
 apt-get install libespeak-dev python-espeak
+
+
+pip install Adafruit_BBIO
+pip install Adafruit_Libraries
+apt-get install postgresql postgresql-server-dev-all postgresql-client-common postgresql-client
+apt-get install python-psycopg2
+apt-get install nginx
+apt-get remove apache2* ; apt-get autoremove
+pip install django
+pip install django_pipeline
+pip install simplejson
+apt-get install libzmq-dev python-zmq
+pip install gunicorn
