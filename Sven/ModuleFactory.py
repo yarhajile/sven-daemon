@@ -6,7 +6,7 @@ Written by Elijah Ethun <elijahe@gmail.com>
 """
 
 """
-Factory responsible for creating and monitoring module instances.
+Factory responsible for creating and monitoring module thread instances.
 """
 
 import time
@@ -19,10 +19,6 @@ from Sven.DispatchedModulesContainer import DispatchedModulesContainer
 from Sven.ThreadContainer import ThreadContainer
 
 class ModuleFactory(object):
-
-  """
-  Class handling the dispatched modules and running threads.
-  """
 
   def __init__(self, db, config):
     self.db = db
@@ -41,7 +37,6 @@ class ModuleFactory(object):
         base = __import__('Sven.Module.' + interface + '.Base')
         pkgpath = os.path.dirname(base.__file__) + '/Module/' + interface
         modules = [name for _, name, _ in pkgutil.iter_modules([pkgpath])]
-        notice(pkgpath)
         for module_name in modules:
           if module_name == 'Base':
             continue
@@ -77,6 +72,7 @@ class ModuleFactory(object):
     queued up SQL writes since threads can't write for themselves unless they
     open up a new db connection.
     """
+
     if self.events_insert:
       self.insertEvents()
 
@@ -84,8 +80,6 @@ class ModuleFactory(object):
   def addModule(self, module):
     """
     Adds a module to our dispatched_modules container object
-    @todo Find out of this overlaps with self.addThread() at all... maybe one
-    of us needs to go away
     """
 
     self.dispatched_modules.add(module)
@@ -94,8 +88,6 @@ class ModuleFactory(object):
   def addThread(self, thread):
     """
     Adds a thread to our threads container object
-    @todo Find out of this overlaps with self.addModule() at all... maybe one
-    of us needs to go away
     """
 
     self.threads.add(thread)
@@ -112,7 +104,7 @@ class ModuleFactory(object):
 
   def insertEvents(self):
     """
-    Execute insertion of monitor events
+    Execute insertion of monitor events.
     """
 
     for index, event in enumerate(self.events_insert):
@@ -127,7 +119,7 @@ class ModuleFactory(object):
   def checkForNewModules(self):
     """
     Threads are responsible for removing themselves from the thread pool,
-    but we have to manually check for new ones here
+    but we have to manually check for new ones here.
     """
 
     pass

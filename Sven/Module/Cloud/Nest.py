@@ -151,7 +151,6 @@ class Nest(Base):
                                    data = {'username' : self.username,
                                            'password' : self.password},
                                    headers = self.headers()).json()
-      notice(response)
 
       self.userid = response['userid']
       self.access_token = response['access_token']
@@ -265,21 +264,27 @@ class Nest(Base):
     return self.status['device'][self.serial]['temperature_scale']
 
 
-  def temperature_in_celsius(self, temperature):
+  def temperatureInCelsius(self, temperature):
     if 'F' == self.temperatureScale():
       return ( temperature - 32 ) / 1.8
 
     return temperature
 
+  def temperatureInFahrenheit(self, temperature):
+    return ( temperature * 2 ) + 30
 
   def currentTemperature(self):
-    return "%0.1f" % self.tempOutput(
+    return "%0.f" % self.tempOutput(
       self.status["shared"][self.serial]["current_temperature"])
 
 
   def currentHumidity(self):
     return self.status["device"][self.serial]["current_humidity"]
 
+
+  def currentOutsideTemperature(self):
+    return "%0.f" % self.temperatureInFahrenheit(
+      self.currentWeather()['outside_weather']['now']['current_temperature'])
 
   def currentWeather(self):
     weather = {
@@ -289,7 +294,7 @@ class Nest(Base):
         self.status['device'][self.serial]['postal_code']),
     }
 
-    weather['outside_weather']['now']['current_temperature'] = self.temperatureInUserScale(weather['outside_weather']['now']['current_temperature'])
+#    weather['outside_weather']['now']['current_temperature'] = self.temperatureInUserScale(weather['outside_weather']['now']['current_temperature'])
     return weather
 
 

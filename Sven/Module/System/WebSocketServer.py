@@ -97,13 +97,13 @@ class WebSocketServer(Base):
         if device_id == self.id:
           device = self
         else:
-          notice("fetching device by id")
+          notice("Fetching device by id.")
           device = self.module_factory.dispatched_modules\
             .getDeviceById(device_id)
 
         if device is None:
-          output['message'] = 'Unable to run %s for device id %s.  Device might ' \
-                              'not be active in daemon.' \
+          output['message'] = 'Unable to run %s for device id %s.  Device ' \
+                              'might not be active in daemon.' \
                               % (action, device_id, )
           return output
 

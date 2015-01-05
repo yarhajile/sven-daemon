@@ -25,7 +25,7 @@ import Sven.Database
 
 class ModuleBase(object):
   """
-  Abstract class methods for Sven
+  Abstract class methods for Sven.
   """
 
   event_triggered = None
@@ -58,15 +58,6 @@ class ModuleBase(object):
   untruth = [False, 'false', '0', 'f', 'n', 'no']
 
   def __init__(self, module_factory, db, id):
-    """
-    Constructor
-
-    @param module_factory:
-    @param db:
-    @param id:
-    @return:
-    """
-
     self.db = db
     self.id = id
     self.device_type = self.__module__
@@ -121,7 +112,7 @@ class ModuleBase(object):
 
   def parameterCheck(self):
     """
-    Some common parameters we want to evaluate & set
+    Some common parameters we want to evaluate & set.
     """
 
     for parameter in self.device_parameters:
@@ -147,16 +138,16 @@ class ModuleBase(object):
 
   def addThread(self):
     """
-    Add new thread
+    Add new thread.
     """
 
     thread = Sven.Thread.Thread(self)
     thread.start()
 
-    # Append to the module_factory's module list
+    # Append to the module_factory's module list.
     self.module_factory.addModule(self)
 
-    # Append to the module_factory's thread list
+    # Append to the module_factory's thread list.
     self.module_factory.addThread(thread)
 
     notice_string = \
@@ -187,7 +178,7 @@ class ModuleBase(object):
 
   def runTimedUpdates(self, thread):
     """
-    Poll for updates that the module is looking for
+    Poll for updates that the module is looking for.
     """
 
     current_execution_time = time.time()
@@ -196,14 +187,14 @@ class ModuleBase(object):
         int(self.module_factory.config['update_timer_interval']):
       self.handleUpdates(thread)
       # Maybe the updates take a long time to run? Use the current time for
-      # the lastExecution time instead of currentExecutionTime
+      # the lastExecution time instead of currentExecutionTime.
       self.last_execution_time = time.time()
 
 
   @classmethod
   def dispatch(cls, module_factory, db, _temp, **kwargs):
     """
-    General purpose module dispatcher
+    General purpose module dispatcher.
     """
 
     if 'device_id' in kwargs:
@@ -211,10 +202,11 @@ class ModuleBase(object):
         object = getattr(_temp, cls.__name__)(module_factory = module_factory,
                                               db = db, id = kwargs['device_id'])
 
-        # Hand it off to the thread handler
+        # Hand it off to the thread handler.
         object.addThread()
       except:
         notice(traceback.format_exc())
+
       return
 
     cursor = db.execute("SELECT device_id FROM devices_%s "
@@ -229,7 +221,7 @@ class ModuleBase(object):
         object = getattr(_temp, cls.__name__)(module_factory = module_factory,
                                               db = db, id = value['device_id'])
 
-        # Hand it off to the thread handler
+        # Hand it off to the thread handler.
         object.addThread()
       except:
         notice(traceback.format_exc())
@@ -237,7 +229,7 @@ class ModuleBase(object):
 
   def cleanup(self):
     """
-    Called on thread shutdown
+    Called on thread shutdown.
     """
 
     pass
@@ -246,17 +238,13 @@ class ModuleBase(object):
   def setOutputActionConditions(self):
     """
     Conditions we would like the front-end to consider for execution of output
-    action_*() methods
+    action_*() methods.
     """
 
     pass
 
 
   def eventDetected(self, details = None):
-    """
-    @param details:
-    @return:
-    """
 
     jsonMessage = {
       'module': self.__module__,
@@ -264,7 +252,7 @@ class ModuleBase(object):
       'id':self.id
     }
 
-    # Append all 'moduleParameters' to the message
+    # Append all 'moduleParameters' to the message.
     for module_parameter in self.module_parameters:
       jsonMessage.update({ module_parameter : getattr(self, module_parameter) })
 
@@ -314,23 +302,23 @@ class ModuleBase(object):
     if update:
       if update['active'] == 0:
         # Thread suicide coming up since we've deactivated the device in the
-        # front-end
+        # front-end.
         notice("Deactivating device id %s" % self.id)
 
         thread.running = False
 
-        # Return false so that children don't try to reload the thread
+        # Return false so that children don't try to reload the thread.
         return False
 
 
       # @todo Not all scenarios will require a complete rebuild of the thread.
-      # Updating the values will be sufficient in most cases
+      # Updating the values will be sufficient in most cases.
 
       notice("Tearing down the current %s thread for device id '%s' and "
              "rebuilding it with new values..." %
              (self.__class__.__name__, self.id))
 
-      # Remove any event detection
+      # Remove any event detection.
       self.removeEvent()
 
       db.execute("UPDATE monitor_device SET update_trigger = false "
@@ -338,7 +326,7 @@ class ModuleBase(object):
       db.commit()
 
       try:
-        # Rebuild the object with updated parameters
+        # Rebuild the object with updated parameters.
         self.build(db)
       except:
         # Something went wonky rebuilding the object or adding the event, go
@@ -358,9 +346,6 @@ class ModuleBase(object):
     something occurs.  We then add to this list the action_METHOD() we want
     to call.  If an item is added to this dict, the next loop of the
     threadTarget() while loop will run the 'actionsToPerform' in itself.
-
-    @param actions:
-    @return:
     """
     notice(kwargs['actions'])
 
@@ -375,8 +360,6 @@ class ModuleBase(object):
     self.eventTriggered is a dict of {'calling_module' : <object>,
     'actions_to_perform' : [{'action' : 'chirp' : {'parameters' :
     {'parameter1, 'parameter2' }}]}
-
-    @return:
     """
 
     for action_to_perform in self.event_triggered['actions_to_perform']:
@@ -384,7 +367,7 @@ class ModuleBase(object):
                              action = action_to_perform['action'],
                              parameters = action_to_perform['parameters'])
 
-    # Reset the eventTriggered dict
+    # Reset the eventTriggered dict.
     self.event_triggered = None
 
 
@@ -393,9 +376,6 @@ class ModuleBase(object):
     This is abstracted out from the runTriggeredEvents() above so that we can
     call actions individually and immediately without running them through
     the triggered events queue, like from the websockets.
-
-    @param kwargs:
-    @return:
     """
 
     # Allow us to call actions without the action_ prefix
@@ -425,75 +405,11 @@ class ModuleBase(object):
     return self.module_factory.dispatched_modules.getDeviceById(device_id)
 
 
-  def getCallbackActionsPREVIOUS(self):
-    output = [];
-
-    if not self.callback_action_cache:
-      notice("Fetched new callback actions from db for device id %s" %
-             str(self.id))
-      db = Sven.Database.Database.open(self.module_factory.config)
-      cursor = db.execute("SELECT output_device_id, action, parameters, "
-                          "arm_status_id, arm_status_device, "
-                          "arm_status_location, arm_status_location_group "
-                          "FROM device_output_actions WHERE id = %s",
-                          (self.id,))
-
-      self.callback_action_cache = cursor.fetchall()
-
-    actions = self.callback_action_cache
-    notice(actions)
-
-    for action in actions:
-      found = False
-
-      # Don't fire this action if there is an alarm status override for the
-      # device that doesn't match the parent status.
-      if action['arm_status_device'] > 0 and \
-              action['arm_status_device'] != action['arm_status_id']:
-        continue
-
-      # Don't fire the action if there is an alarm status override for the
-      # location that doesn't match the parent status.
-      if (
-        action['arm_status_location'] > 0
-        and action['arm_status_location'] != action['arm_status_id']
-        and action['arm_status_device'] != action['arm_status_id']
-     ):
-        continue
-
-      # Don't fire the action if the group status doesn't match
-      if (
-        action['arm_status_location_group'] > 0
-        and action['arm_status_location_group'] != action['arm_status_id']
-        and action['arm_status_location'] != action['arm_status_id']
-        and action['arm_status_device'] != action['arm_status_id']
-     ):
-        continue
-
-      # Arm status filtering passed, both device and location armed status
-      # must be 0 and the group status matches our current armed state.
-      for element in output:
-        if element['output_device_id'] == action['output_device_id']:
-          found = True
-          element['output_actions'].append(
-            {'action' : action['action'],
-             'parameters' : json.loads(action['parameters'])})
-
-      if found == False:
-        output.append(
-          {'output_device_id' : action['output_device_id'],
-           'output_actions' : [
-             {'action' : action['action'],
-              'parameters' : json.loads(action['parameters'])}]})
-
-    return output
-
-
   def getCallbackActions(self):
     output = [];
 
     if not self.callback_action_cache:
-      notice("Fetched new callback actions from db for device id %s" %
+      notice("Fetched new callback actions from db for device id %s." %
              (str(self.id),))
       db = Sven.Database.Database.open(self.module_factory.config)
       cursor = db.execute("SELECT output_device_id, action, parameters "
@@ -563,6 +479,7 @@ class ModuleBase(object):
 
     notice(message)
 
+
     # List of ALL actions we will be performing each time the callback is
     # called for this specific device.
     for action_device in self.getCallbackActions():
@@ -621,7 +538,7 @@ class ModuleBase(object):
         _temp = __import__(_name, globals(), locals(), [kwargs['input_bus']])
         module = getattr(_temp, kwargs['input_bus'])
 
-        # Skip execution if the module is already active
+        # Skip execution if the module is already active.
         if outer.module_factory.dispatched_modules.getDeviceById(
             int(kwargs['device_id'])):
           notice("Device id %s already dispatched" % kwargs['device_id'])
